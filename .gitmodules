@@ -1,6 +1,1 @@
-[submodule "mmsegmentation"]
-	path = mmsegmentation
-	url = git@github.com:open-mmlab/mmsegmentation.git
-[submodule "mmpretrain"]
-	path = mmpretrain
-	url = git@github.com:open-mmlab/mmpretrain.git
+
