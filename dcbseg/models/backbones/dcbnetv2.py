@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
+from mmcv.cnn import ConvModule
 from mmseg.registry import MODELS
 from mmseg.utils import OptConfigType
 from mmseg.models.utils import DAPPM, PAPPM, BasicBlock, Bottleneck
@@ -54,9 +55,36 @@ class DCBNetv2(BackboneBaseModule):
         self.act_cfg = act_cfg
         self.align_corners = align_corners
 
-        # stem layer
-        self.stem = self._make_stem_layer(in_channels, channels,
-                                          num_stem_blocks)
+        # stem layer - we need better granularity to integrate the SBD modules
+        self.conv1 =  nn.Sequential([
+             ConvModule(
+                in_channels,
+                channels,
+                kernel_size=3,
+                stride=2,
+                padding=1,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg),
+            ConvModule(
+                channels,
+                channels,
+                kernel_size=3,
+                stride=2,
+                padding=1,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg)
+        ])
+        self.stage_1 = self._make_layer(
+            block=BasicBlock,
+            in_channels=channels,
+            channels=channels,
+            num_blocks=num_stem_blocks)
+        self.stage_2 = self._make_layer(
+            block=BasicBlock,
+            in_channels=channels,
+            channels=channels * 2,
+            num_blocks=num_stem_blocks,
+            stride=2)
         self.relu = nn.ReLU()
 
         # I Branch
@@ -92,11 +120,17 @@ class DCBNetv2(BackboneBaseModule):
         w_out = x.shape[-1] // 8
         h_out = x.shape[-2] // 8
 
-        # stage 0-2
-        x_0_2 = self.stem(x)
+        # stage 0
+        x = self.conv1(x)
+
+        # stage 1
+        x_1 = self.relu(self.stage_1(x))
+
+        # stage 2
+        x_2 = self.relu(self.stage_2(x_1))
 
         # stage 3
-        x_3 = self.relu(self.i_branch_layers[0](x_0_2))
+        x_3 = self.relu(self.i_branch_layers[0](x_2))
 
         # stage 4
         x_4 = self.relu(self.i_branch_layers[1](x_3))
@@ -113,16 +147,9 @@ class DCBNetv2(BackboneBaseModule):
         
         if config.ABLATION == 0:
             return x_out
-        elif config.ABLATION == 1 or config.ABLATION == 2: # PI Model or ID Model
-            return (x_0_2, x_3, x_4, x_out)
-        elif config.ABLATION == 3: # I SBD Model
-            pass
-        elif config.ABLATION == 4: # PID Model
-            return (x_0_2, x_3, x_4, x_out)
-        elif config.ABLATION == 5: # PI SBD Model
-            pass
-        elif config.ABLATION == 6: # ID SBD Model
-            pass
-        elif config.ABLATION == 7: # PID SBD Model
-            pass
+        elif config.ABLATION == 1 or config.ABLATION == 2 or config.ABLATION == 4: # PI Model (1), ID Model (2), PID Model (4)
+            return (x_2, x_3, x_4, x_out)
+        else: # I SBD Model (3), PI SBD Model (5), ID SBD Model (6), PID SBD Model (7)
+            return (x_1, x_2, x_3, x_4, x_5, x_out)
+
 

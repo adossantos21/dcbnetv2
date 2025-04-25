@@ -96,10 +96,10 @@ class PModule(CustomBaseModule):
             Tensor or tuple[Tensor]: If self.training is True, return
                 tuple[Tensor], else return Tensor.
         """
-        x_0_2, x_3, x_4, _ = x
+        x_2, x_3, x_4 = x
 
         # stage 3
-        x_p = self.p_branch_layers[0](x_0_2)
+        x_p = self.p_branch_layers[0](x_2)
 
         comp_i = self.compression_1(x_3)
         x_p = self.pag_1(x_p, comp_i)
@@ -182,14 +182,14 @@ class DModule(CustomBaseModule):
             Tensor or tuple[Tensor]: If self.training is True, return
                 tuple[Tensor], else return Tensor.
         """
-        x_0_2, x_3, x_4, _ = x
+        x_2, x_3, x_4 = x
 
         w_out = x.shape[-1] // 8
         h_out = x.shape[-2] // 8
 
 
         # stage 3
-        x_d = self.d_branch_layers[0](x_0_2)
+        x_d = self.d_branch_layers[0](x_2)
 
         diff_i = self.diff_1(x_3)
         x_d += F.interpolate(
@@ -226,7 +226,16 @@ class DFF(BaseModule):
     '''
     Model layers for the Dynamic Feature Fusion (DFF) SBD module.
     '''
-    pass
+    def __init__(self, nclass, norm_layer=nn.BatchNorm2d, **kwargs):
+        super(DFF, self).__init__(nclass, norm_layer=norm_layer, **kwargs)
+        self.nclass = nclass
+        self.ada_learner = LocationAdaptiveLearner(nclass, nclass*4, nclass*4, norm_layer=norm_layer)
+        self.side1 = nn.Sequential(nn.Conv2d(64, 1, 1),
+                                   norm_layer(1))
+        self.side2 = nn.Sequential(nn.Conv2d(256, 1, 1)) # finish coding this
+
+    def forward(self, x):
+        c1, c2, c3, _, c5, _ = x # finish coding this too
 
 class BGF(BaseModule):
     '''
