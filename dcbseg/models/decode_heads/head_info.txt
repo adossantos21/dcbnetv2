@@ -1,0 +1,12 @@
+You'll be coding 10 decode heads:
+
+1.  Baseline
+2.  Baseline + P Head (from PIDNet's P Branch)
+3.  Baseline + D Head (from PIDNet's D Branch)
+4.  Baseline + CASENet SBD Head
+5.  Baseline + DFF SBD Head
+6.  Baseline + BEM SBD Head
+7.  Baseline + P Head + D Head (PIDNet)
+8.  Baseline + P Head + SBD Head
+9.  Baseline + D Head + SBD Head
+10. Baseline + P Head + D Head + SBD Head (PIDNet + SBD)

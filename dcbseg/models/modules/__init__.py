@@ -10,7 +10,7 @@ from .aux_modules import (
     DModule,
     CASENet,
     DFF,
-    BGF,
+    BEM,
 )
 
 __all__ = [
@@ -22,5 +22,5 @@ __all__ = [
     "DModule",
     "CASENet",
     "DFF",
-    "BGF",
+    "BEM",
 ]

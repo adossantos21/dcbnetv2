@@ -55,8 +55,8 @@ class PagFM(BaseModule):
         """Forward function.
 
         Args:
-            x_p (Tensor): The featrue map from P branch.
-            x_i (Tensor): The featrue map from I branch.
+            x_p (Tensor): The feature map from P branch.
+            x_i (Tensor): The feature map from I branch.
 
         Returns:
             Tensor: The feature map with pixel-attention-guided fusion.
@@ -130,9 +130,9 @@ class Bag(BaseModule):
         """Forward function.
 
         Args:
-            x_p (Tensor): The featrue map from P branch.
-            x_i (Tensor): The featrue map from I branch.
-            x_d (Tensor): The featrue map from D branch.
+            x_p (Tensor): The feature map from P branch.
+            x_i (Tensor): The feature map from I branch.
+            x_d (Tensor): The feature map from D branch.
 
         Returns:
             Tensor: The feature map with boundary-attention-guided fusion.
@@ -176,9 +176,9 @@ class LightBag(BaseModule):
     def forward(self, x_p: Tensor, x_i: Tensor, x_d: Tensor) -> Tensor:
         """Forward function.
         Args:
-            x_p (Tensor): The featrue map from P branch.
-            x_i (Tensor): The featrue map from I branch.
-            x_d (Tensor): The featrue map from D branch.
+            x_p (Tensor): The feature map from P branch.
+            x_i (Tensor): The feature map from I branch.
+            x_d (Tensor): The feature map from D branch.
 
         Returns:
             Tensor: The feature map with light boundary-attention-guided
@@ -192,7 +192,51 @@ class LightBag(BaseModule):
         return f_p + f_i
 
 class PIFusion(BaseModule):
-    '''
+    """
     Fusion Module for PI Model.
-    '''
-    pass
+
+    Args:
+        in_channels (int): The number of input channels.
+        out_channels (int): The number of output channels.
+        kernel_size (int): The kernel size of the convolution. Default: 3.
+        padding (int): The padding of the convolution. Default: 1.
+        norm_cfg (dict): Config dict for normalization layer.
+            Default: dict(type='BN').
+        act_cfg (dict): Config dict for activation layer.
+            Default: dict(type='ReLU', inplace=True).
+        conv_cfg (dict): Config dict for convolution layer.
+            Default: dict(order=('norm', 'act', 'conv')).
+        init_cfg (dict): Config dict for initialization. Default: None.
+    """
+
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int = 3,
+                 padding: int = 1,
+                 norm_cfg: OptConfigType = dict(type='BN'),
+                 act_cfg: OptConfigType = dict(type='ReLU', inplace=True),
+                 conv_cfg: OptConfigType = dict(order=('norm', 'act', 'conv')),
+                 init_cfg: OptConfigType = None):
+        super().__init__(init_cfg)
+
+        self.conv = ConvModule(
+            in_channels,
+            out_channels,
+            kernel_size,
+            padding=padding,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg,
+            **conv_cfg)
+
+    def forward(self, x_p: Tensor, x_i: Tensor) -> Tensor:
+        """Forward function.
+
+        Args:
+            x_p (Tensor): The feature map from P branch.
+            x_i (Tensor): The feature map from I branch.
+
+        Returns:
+            Tensor: The feature map with boundary-attention-guided fusion.
+        """
+        return self.conv(x_p + x_i)

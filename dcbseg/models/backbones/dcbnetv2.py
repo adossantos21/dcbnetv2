@@ -111,7 +111,7 @@ class DCBNetv2(BackboneBaseModule):
         """Forward function.
 
         Args:
-            x (Tensor): Input tensor with shape (B, C, H, W).
+            x (Tensor): Input tensor with shape (N, C, H, W).
 
         Returns:
             Tensor or tuple[Tensor]: If self.training is True, return
@@ -121,7 +121,7 @@ class DCBNetv2(BackboneBaseModule):
         h_out = x.shape[-2] // 8
 
         # stage 0
-        x = self.conv1(x)
+        x = self.conv1(x) # (N, C, H/4, W/4)
 
         # stage 1
         x_1 = self.relu(self.stage_1(x))
@@ -139,17 +139,20 @@ class DCBNetv2(BackboneBaseModule):
         x_5 = self.i_branch_layers[2](x_4)
 
         x_spp = self.spp(x_5) # performs adaptive avg pooling at several scaled kernels: {5, 9, 17}
-        x_out = F.interpolate(
+        x_out = F.interpolate( # (N, 256, H/8, W/8)
             x_spp,
             size=[h_out, w_out],
             mode='bilinear',
             align_corners=self.align_corners)
         
-        if config.ABLATION == 0:
+        if self.training: # self.training is inherent to MMSeg configurations throughout BaseModule and BaseDecodeHead objects.
+            if config.ABLATION == 0:
+                return x_out
+            elif config.ABLATION == 1 or config.ABLATION == 2 or config.ABLATION == 4: # PI Model (1), ID Model (2), PID Model (4)
+                return (x_2, x_3, x_4, x_out)
+            else: # I SBD Model (3), PI SBD Model (5), ID SBD Model (6), PID SBD Model (7)
+                return (x_1, x_2, x_3, x_4, x_5, x_out)
+        else:
             return x_out
-        elif config.ABLATION == 1 or config.ABLATION == 2 or config.ABLATION == 4: # PI Model (1), ID Model (2), PID Model (4)
-            return (x_2, x_3, x_4, x_out)
-        else: # I SBD Model (3), PI SBD Model (5), ID SBD Model (6), PID SBD Model (7)
-            return (x_1, x_2, x_3, x_4, x_5, x_out)
 
 
