@@ -28,7 +28,8 @@ class BaselinePHead(BaseDecodeHead):
         self.num_classes = num_classes
         self.p_module = PModule(channels=self.in_channels // 4)
         self.fusion = PIFusion(self.in_channels, self.in_channels, norm_cfg=self.norm_cfg, act_cfg=self.act_cfg_dfm)
-        self.p_head = nn.Conv2d(self.in_channels // 2, self.num_classes, kernel_size=1)
+        if self.training:
+            self.p_head = nn.Conv2d(self.in_channels // 2, self.num_classes, kernel_size=1)
         self.seg_head = nn.Conv2d(self.in_channels, self.num_classes, kernel_size=1)
 
     def forward(self, x):

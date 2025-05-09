@@ -83,7 +83,8 @@ class PModule(CustomBaseModule):
         """Forward function.
         
         NOTE: self.training is inherent to MMSeg configurations throughout BaseModule 
-        and BaseDecodeHead objects.
+        and BaseDecodeHead objects. Its boolean is inherited based on whether the
+        train loop or the test/val loops are executing.
         
         Args:
             x (Tensor): Input tensor with shape (B, C, H, W).
@@ -209,22 +210,21 @@ class DModule(CustomBaseModule):
         # stage 5
         x_d = self.d_branch_layers[2](self.relu(x_d))
 
-        if self.training:
-            return temp_d, x_d
+        return temp_d, x_d if self.training else x_d
 
 class CASENet(CustomBaseModule):
     '''
     Model layers for the CASENet SBD module.
     '''
-    def __init__(self, nclass, backbone, norm_layer=nn.BatchNorm2d, **kwargs):
-        super(CASENet, self).__init__(nclass, backbone, norm_layer=norm_layer, **kwargs)
+    def __init__(self, nclass, norm_layer=nn.BatchNorm2d, **kwargs):
+        super(CASENet, self).__init__(nclass, norm_layer=norm_layer, **kwargs)
 
         self.side1 = nn.Conv2d(64, 1, 1)
         self.side2 = nn.Sequential(nn.Conv2d(256, 1, 1, bias=True),
                                    nn.ConvTranspose2d(1, 1, 4, stride=2, padding=1, bias=False))
         self.side3 = nn.Sequential(nn.Conv2d(512, 1, 1, bias=True),
                                    nn.ConvTranspose2d(1, 1, 8, stride=4, padding=2, bias=False))
-        self.side5 = nn.Sequential(nn.Conv2d(2048, nclass, 1, bias=True),
+        self.side5 = nn.Sequential(nn.Conv2d(1024, nclass, 1, bias=True), # originally, 1024 was 2048; changed due to PIDNet architecture
                                    nn.ConvTranspose2d(nclass, nclass, 16, stride=8, padding=4, bias=False))
         self.fuse = nn.Conv2d(nclass*4, nclass, 1, groups=nclass, bias=True)
 
@@ -264,11 +264,11 @@ class DFF(CustomBaseModule):
         self.side3 = nn.Sequential(nn.Conv2d(512, 1, 1, bias=True),
                                    norm_layer(1),
                                    nn.ConvTranspose2d(1, 1, 8, stride=4, padding=2, bias=False))
-        self.side5 = nn.Sequential(nn.Conv2d(2048, nclass, 1, bias=True),
+        self.side5 = nn.Sequential(nn.Conv2d(1024, nclass, 1, bias=True), # originally, 1024 was 2048; changed due to PIDNet architecture
                                    norm_layer(nclass),
                                    nn.ConvTranspose2d(nclass, nclass, 16, stride=8, padding=4, bias=False))
 
-        self.side5_w = nn.Sequential(nn.Conv2d(2048, nclass*4, 1, bias=True),
+        self.side5_w = nn.Sequential(nn.Conv2d(1024, nclass*4, 1, bias=True), # originally, 1024 was 2048; changed due to PIDNet architecture
                                    norm_layer(nclass*4),
                                    nn.ConvTranspose2d(nclass*4, nclass*4, 16, stride=8, padding=4, bias=False))
 

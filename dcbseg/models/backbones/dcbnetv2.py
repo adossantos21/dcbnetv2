@@ -121,22 +121,22 @@ class DCBNetv2(BackboneBaseModule):
         h_out = x.shape[-2] // 8
 
         # stage 0
-        x = self.conv1(x) # (N, C, H/4, W/4)
+        x = self.conv1(x) # (N, C=64, H/4, W/4)
 
         # stage 1
-        x_1 = self.relu(self.stage_1(x))
+        x_1 = self.relu(self.stage_1(x)) # (N, C=64, H/4, W/4)
 
         # stage 2
-        x_2 = self.relu(self.stage_2(x_1))
+        x_2 = self.relu(self.stage_2(x_1)) # (N, C=128, H/8, W/8)
 
         # stage 3
-        x_3 = self.relu(self.i_branch_layers[0](x_2))
+        x_3 = self.relu(self.i_branch_layers[0](x_2)) # (N, C=256, H/16, W/16)
 
         # stage 4
-        x_4 = self.relu(self.i_branch_layers[1](x_3))
+        x_4 = self.relu(self.i_branch_layers[1](x_3)) # (N, C=512, H/32, W/32)
 
         # stage 5
-        x_5 = self.i_branch_layers[2](x_4)
+        x_5 = self.i_branch_layers[2](x_4) # (N, C=1024, H/64, W/64)
 
         x_spp = self.spp(x_5) # performs adaptive avg pooling at several scaled kernels: {5, 9, 17}
         x_out = F.interpolate( # (N, 256, H/8, W/8)
