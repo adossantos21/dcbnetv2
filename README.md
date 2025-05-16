@@ -13,16 +13,16 @@ To begin, a vanilla CNN backbone is adapted from the integral (I) branch of PIDN
 
 ### Stage 2 - Finetuning
 Next, a decoder is attached for the downstream semantic segmentation task. A baseline is established prior to 9 ablation studies that examine the effects of different heads. These heads either directly contribute to the dense prediction yielded by SEBNet, or they condition the backbone.
-1.  A baseline is established by attaching a pyramid pooling module (DAPPM or PAPPM) and a vanilla segmentation head.
-2.  Baseline + P Head (from PIDNet's P Branch)
-3.  Baseline + D Head (from PIDNet's D Branch)
-4.  Baseline + CASENet SBD Head
-5.  Baseline + DFF SBD Head
-6.  Baseline + BEM SBD Head
-7.  Baseline + P Head + D Head (PIDNet)
-8.  Baseline + P Head + SBD Head
-9.  Baseline + D Head + SBD Head
-10. Baseline + P Head + D Head + SBD Head (PIDNet + SBD)
+1.  **Ablation 01** - A baseline is established by attaching a pyramid pooling module (DAPPM or PAPPM) and a vanilla segmentation head.
+2.  **Ablation 02** - Baseline + P Head (from PIDNet's P Branch)
+3.  **Ablation 03** - Baseline + D Head (from PIDNet's D Branch)
+4.  **Ablation 04** - Baseline + CASENet SBD Head
+5.  **Ablation 05** - Baseline + DFF SBD Head
+6.  **Ablation 06** - Baseline + BEM SBD Head
+7.  **Ablation 07** - Baseline + P Head + D Head (PIDNet)
+8.  **Ablation 08** - Baseline + P Head + SBD Head
+9.  **Ablation 09** - Baseline + D Head + SBD Head
+10. **Ablation 10** - Baseline + P Head + D Head + SBD Head (PIDNet + SBD)
 
 ## Results
 Results are pending. The target date for results is June 31st, 2025. Model weights for the best performing networks will be uploaded following experimentation.
