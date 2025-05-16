@@ -13,10 +13,10 @@ from .base import BackboneBaseModule
 
 
 @MODELS.register_module()
-class DCBNetv2(BackboneBaseModule):
-    """DCBNetv2 backbone.
+class SEBNet(BackboneBaseModule):
+    """SEBNet backbone.
 
-    This backbone is the implementation of `DCBNetv2: Real-Time Semantic
+    This backbone is the implementation of `SEBNet: Real-Time Semantic
     Segmentation with Semantic Boundary Detection Conditioning.
 
     Licensed under the MIT License.
