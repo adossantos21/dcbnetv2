@@ -1,0 +1,17 @@
+.gitignore
+.gitattributes
+__pycache__
+*/__pycache__
+*/*/__pycache__
+*/*/*/__pycache__
+data/*
+*.jpg
+*.png
+*.pt
+*.pth
+*.tar
+*.log
+*.out
+*.so
+*.pkl
+*.csv
