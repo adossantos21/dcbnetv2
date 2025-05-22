@@ -98,15 +98,6 @@ class SEBNet(BaseBackbone):
                     channels=channels * 8 if i > 0 else channels * 4,
                     num_blocks=num_branch_blocks if i < 2 else 2,
                     stride=2))
-
-        # Spatial Pyramid Pooling and Fusion Modules
-        if num_stem_blocks == 2:
-            spp_module = PAPPM
-        else:
-            spp_module = DAPPM
-
-        self.spp = spp_module(
-            channels * 16, ppm_channels, channels * 4, num_scales=5)
         
     def _make_stem_layer(self, in_channels: int, channels: int,
                          num_blocks: int) -> nn.Sequential:
@@ -269,6 +260,7 @@ class SEBNet(BaseBackbone):
         # stage 5
         x_5 = self.i_branch_layers[2](x_4) # (N, C=1024, H/64, W/64)
 
+        return x_5
         x_spp = self.spp(x_5) # performs adaptive avg pooling at several scaled kernels: {5, 9, 17}
         x_out = F.interpolate( # (N, 256, H/8, W/8)
             x_spp,
