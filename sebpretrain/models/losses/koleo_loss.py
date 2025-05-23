@@ -8,19 +8,20 @@ import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from mmpretrain.registry import MODELS
 # import torch.distributed as dist
 
 
 logger = logging.getLogger("dinov2")
 
-
+@MODELS.register_module()
 class KoLeoLoss(nn.Module):
     """Kozachenko-Leonenko entropic loss regularizer from Sablayrolles et al. - 2018 - Spreading vectors for similarity search"""
 
-    def __init__(self):
+    def __init__(self, loss_weight:float):
         super().__init__()
         self.pdist = nn.PairwiseDistance(2, eps=1e-8)
+        self.loss_weight = loss_weight
 
     def pairwise_NNs_inner(self, x):
         """
@@ -45,4 +46,4 @@ class KoLeoLoss(nn.Module):
             I = self.pairwise_NNs_inner(student_output)  # noqa: E741
             distances = self.pdist(student_output, student_output[I])  # BxD, BxD -> B
             loss = -torch.log(distances + eps).mean()
-        return loss
+        return loss * self.loss_weight

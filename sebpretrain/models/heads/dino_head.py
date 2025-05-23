@@ -7,9 +7,11 @@ import torch
 import torch.nn as nn
 from torch.nn.init import trunc_normal_
 from torch.nn.utils import weight_norm
+from .cls_head import ClsHead
+from mmpretrain.registry import MODELS
 
-
-class DINOHead(nn.Module):
+@MODELS.register_module()
+class DINOHead(ClsHead): # Changed from nn.Module to ClsHead, which inherits from BaseModule, which inherits from nn.Module
     def __init__(
         self,
         in_dim,
@@ -37,15 +39,9 @@ class DINOHead(nn.Module):
         x = self.mlp(x)
         eps = 1e-6 if x.dtype == torch.float16 else 1e-12
         x = nn.functional.normalize(x, dim=-1, p=2, eps=eps)
+        # The final classification head
         x = self.last_layer(x)
         return x
-    
-    def loss(self, feats, data_samples):
-        pass
-
-    def predict(self, feats, data_samples):
-        pass
-
 
 def _build_mlp(nlayers, in_dim, bottleneck_dim, hidden_dim=None, use_bn=False, bias=True):
     if nlayers == 1:

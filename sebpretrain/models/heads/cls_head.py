@@ -74,7 +74,7 @@ class ClsHead(BaseModule):
             dict[str, Tensor]: a dictionary of loss components
         """
         # The part can be traced by torch.fx
-        cls_score = self(feats)
+        cls_score = self(feats) # invokes __call__ method of nn.Module(), which invokes the forward() method.
 
         # The part can not be traced by torch.fx
         losses = self._get_loss(cls_score, data_samples, **kwargs)

@@ -8,6 +8,7 @@ from torch import Tensor
 from mmcv.cnn import ConvModule
 from mmpretrain.models.backbones.base_backbone import BaseBackbone
 from mmpretrain.registry import MODELS
+from ..builder import BACKBONES
 from mmengine.runner import CheckpointLoader
 
 from ..utils import OptConfigType
@@ -229,7 +230,7 @@ class SEBNet(BaseBackbone):
                 self.init_cfg['checkpoint'], map_location='cpu')
             self.load_state_dict(ckpt, strict=False)
 
-    def forward(self, config, x: Tensor) -> Union[Tensor, Tuple[Tensor]]:
+    def forward(self, x: Tensor) -> Union[Tensor, Tuple[Tensor]]:
         """Forward function.
 
         Args:
@@ -261,6 +262,7 @@ class SEBNet(BaseBackbone):
         x_5 = self.i_branch_layers[2](x_4) # (N, C=1024, H/64, W/64)
 
         return x_5
+        '''
         x_spp = self.spp(x_5) # performs adaptive avg pooling at several scaled kernels: {5, 9, 17}
         x_out = F.interpolate( # (N, 256, H/8, W/8)
             x_spp,
@@ -277,5 +279,6 @@ class SEBNet(BaseBackbone):
                 return (x_1, x_2, x_3, x_4, x_5, x_out)
         else:
             return x_out
+        '''
 
 
