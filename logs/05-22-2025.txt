@@ -1,0 +1,34 @@
+This project has two stages: Pretraining and Finetuning.
+
+Background from previous days' work:
+You're currently working on the pretraining side of things. MMLabs has a framework with submodules MMPretrain and MMSegmentation. You created your own submodule variants with sebpretrain and sebseg. Some of the scripts you needed from mmsegmentation needed to be retrofit to work within sebpretrain, so that's what you initially did (think basic_block.py and ppm.py). The most recent thing you've done is create the backbone, neck, head, and loss files you'll need to pre-train SEBNet. Here are the files you created for each component:
+
+Backbones
+- sebnet.py, the backbone of SEBNet
+
+Necks
+- ppm.py, includes DAPPM (the neck you'll use for all experiments) and PAPPM (parallelized version used in PIDNet-{M,S}.
+
+Heads
+- cls_head.py, classification head from mmpretrain
+- linear_head.py, linear classification head from mmpretrain
+- multi_task_head.py, multi-task head from mmpretrain
+- dino_head.py, Custom 3-layer MLP head from DINOv{1,2}
+
+Losses
+- cross_entropy_loss.py, standard cross-entropy loss from mmpretrain
+- koleo_loss.py, KoLeo regularization loss from DINOv2
+
+Notes from today: KoLeo regularization and loss is applied on the raw backbone output features (you could apply it on the output of the neck features, but that is counterintuitive, since you want to discriminate as many features as you can). You've realized you need 5 ablations for pre-training: 
+- Initial baseline with no neck (no DAPPM) and DINO head.
+- Baseline with DAPPM neck and DINO head.
+- With no neck, KoLeo (KoLeo applied at backbone output), and DINO head.
+- With DAPPM neck, KoLeo (KoLeo applied at backbone output), and DINO head.
+- With DAPPM neck, KoLeo (KoLeo applied at neck output), and DINO head.
+
+
+TODO:
+1. You need to register KoLeo loss (koleo_loss.py) DINO head (dino_head.py) in MMPretrain registry. Also need to integrate predict() and loss() methods in koleo_loss.py. Compare with other head and loss files from MMPretrain to ensure you've integrated these components correctly.
+2. You also need to set up datasets and configs files for sebpretrain, but that should be fairly easy. datasets folder will have things like transforms and the base dataset scripts (think imagenet_bs32.py). Note that sebpretrain and the entire python project (SEBNet) have separate `configs` folders that you'll need to play around with. You also might need to set up a training script to integrate. You may not need to set up anything other than the overall config file, since some of these scripts should be importable from MMPretrain package.
+3. You'll need to figure out how to integrate cross-entropy loss for the DINO head AND koleo loss for the sebnet backbone/neck. This could be tricky in the config files.
+4. You gotta investigate whether the image classification task recommends restoring the original resolution of the propagated backbone feature maps. If so, you'll have to integrate interpolation to restore the resolution on the neckless ablation outputs and the necked ablation outputs.

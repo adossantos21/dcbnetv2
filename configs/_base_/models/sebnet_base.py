@@ -1,7 +1,7 @@
-custom_imports = dict(
-    imports=['/home/robert.breslin/alessandro/thesis/exp1/sebpretrain/models/backbones/*'],
-    allow_failed_imports=False
-)
+#custom_imports = dict(
+#    imports=['sebpretrain.models.backbones'],
+#    allow_failed_imports=False
+#)
 
 model = dict(
     type='ImageClassifier',     # The type of the main model (here is for image classification task).

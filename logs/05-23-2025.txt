@@ -1,0 +1,23 @@
+Background from previous days' work:
+1. You need to register KoLeo loss (koleo_loss.py) DINO head (dino_head.py) in MMPretrain registry. Also need to integrate predict() and loss() methods in koleo_loss.py. Compare with other head and loss files from MMPretrain to ensure you've integrated these components correctly.
+2. You also need to set up datasets and configs files for sebpretrain, but that should be fairly easy. datasets folder will have things like transforms and the base dataset scripts (think imagenet_bs32.py). Note that sebpretrain and the entire python project (SEBNet) have separate `configs` folders that you'll need to play around with. You also might need to set up a training script to integrate. You may not need to set up anything other than the overall config file, since some of these scripts should be importable from MMPretrain package.
+3. You'll need to figure out how to integrate cross-entropy loss for the DINO head AND koleo loss for the sebnet backbone/neck. This could be tricky in the config files.
+4. You gotta investigate whether the image classification task recommends restoring the original resolution of the propagated backbone feature maps. If so, you'll have to integrate interpolation to restore the resolution on the neckless ablation outputs and the necked ablation outputs.
+
+Notes from today:
+Finished everything listed in the background. Registered KoLeo loss and DINO head. Integrated predict() and loss() methods by having dino_head.py inherit from cls_head.py. Set up the datasets and config files needed to train the model and found out you don't need to set up the sebpretrain/configs folder at all (it's optional). Integrating loss functions into the backbones, necks, and heads was simple. As far as I can tell, you definitely don't need to decode/restore resolution in propagated backbone feature maps until downstream segmentation tasks. 
+Currently, the problems you're facing have to do with mmpretrain custom module registration. When you install mmpretrain as a package, your custom sebnet.py, koleo_loss.py, and dino_head.py files are not automatically imported into the main namespace, preventing the registration from occurring. Without proper importing, even correctly decorated classes remain invisible to the registry system, leading to build failures during model instantiation. There exists a solution in specifying the following line in your config file:
+```
+custom_imports = dict(
+  imports=['/home/robert.breslin/alessandro/thesis/exp1/sebpretrain/models/backbones/*'],
+    allow_failed_imports=False
+)
+```
+However, errors are still being thrown that you need to figure out. Tried adding:
+    /home/robert.breslin/alessandro/thesis/exp1/tools
+    /home/robert.breslin/alessandro/thesis/exp1
+to PYTHONPATH in `nano ~/.bashrc`, but that didn't help with errors. See perplexity prompt "I am getting the following import error when trying to register custom modules in mmpretrain (I installed mmpretrain as a package)" for more information on what to try, but this might take awhile.
+
+TODO:
+1. Figure out how to properly register all custom modules using the custom_imports argument. 
+2. Continue troubleshooting to get your models training.
