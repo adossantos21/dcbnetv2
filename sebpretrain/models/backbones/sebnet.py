@@ -7,13 +7,16 @@ from torch import Tensor
 
 from mmcv.cnn import ConvModule
 from mmpretrain.models.backbones.base_backbone import BaseBackbone
-from mmpretrain.registry import MODELS
-from ..builder import BACKBONES
+#from mmpretrain.registry import MODELS
+#from mmengine.registry import MODELS as ENGINE_MODELS
+#from ..builder import BACKBONES
 from mmengine.runner import CheckpointLoader
-
-from ..utils import OptConfigType
+from mmengine import Registry
+#from ..utils import OptConfigType
 from .utils import BasicBlock, Bottleneck
+from .utils.basic_block import OptConfigType
 
+MODELS = Registry('models')
 @MODELS.register_module()
 class SEBNet(BaseBackbone):
     """SEBNet backbone.
@@ -48,17 +51,17 @@ class SEBNet(BaseBackbone):
                  num_stem_blocks: int = 2,
                  num_branch_blocks: int = 3,
                  align_corners: bool = False,
-                 norm_cfg: OptConfigType = dict(type='BN'),
-                 act_cfg: OptConfigType = dict(type='ReLU', inplace=True),
+                 norm_cfg: dict = dict(type='BN'),
+                 act_cfg: dict = dict(type='ReLU', inplace=True),
                  init_cfg: OptConfigType = None,
                  **kwargs):
-        super().__init__(init_cfg)
+        super(SEBNet, self).__init__(init_cfg)
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.align_corners = align_corners
 
         # stem layer - we need better granularity to integrate the SBD modules
-        self.conv1 =  nn.Sequential([
+        self.conv1 =  nn.Sequential(
              ConvModule(
                 in_channels,
                 channels,
@@ -75,7 +78,7 @@ class SEBNet(BaseBackbone):
                 padding=1,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg)
-        ])
+        )
         self.stage_1 = self._make_layer(
             block=BasicBlock,
             in_channels=channels,

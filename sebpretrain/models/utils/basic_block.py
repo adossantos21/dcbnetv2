@@ -7,7 +7,15 @@ from mmengine.model import BaseModule
 from torch import Tensor
 
 from mmpretrain.registry import MODELS
-from ..utils import OptConfigType
+#from ..utils import OptConfigType
+from typing import Optional, Union
+
+from mmengine.config import ConfigDict
+
+
+# Type hint of config data
+ConfigType = Union[ConfigDict, dict]
+OptConfigType = Optional[ConfigType]
 
 
 class BasicBlock(BaseModule):

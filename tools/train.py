@@ -5,7 +5,8 @@ import os.path as osp
 from copy import deepcopy
 
 from mmengine.config import Config, ConfigDict, DictAction
-from mmengine.registry import RUNNERS
+from mmengine.registry import RUNNERS, MODELS
+#from mmpretrain.registry import MODELS
 from mmengine.runner import Runner
 from mmengine.utils import digit_version
 from mmengine.utils.dl_utils import TORCH_VERSION
@@ -145,6 +146,7 @@ def main():
     # merge cli arguments to config
     cfg = merge_args(cfg, args)
 
+    '''
     # build the runner from config
     if 'runner_type' not in cfg:
         # build the default runner
@@ -152,10 +154,16 @@ def main():
     else:
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg
+
+        # might be able to build custom modules from RUNNERS object. If not, you may be able to build each of your custom modules explicitly as seen https://mmengine.readthedocs.io/en/latest/advanced_tutorials/config.html#import-the-custom-module
         runner = RUNNERS.build(cfg)
+    '''
 
     # start training
-    runner.train()
+    runner = Runner.from_cfg(cfg)
+    #MODELS.build(cfg.model.backbone)
+    #runner = RUNNERS.build(cfg)
+    #runner.train()
 
 
 if __name__ == '__main__':

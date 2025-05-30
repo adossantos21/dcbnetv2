@@ -21,6 +21,7 @@ class DINOHead(ClsHead): # Changed from nn.Module to ClsHead, which inherits fro
         hidden_dim=2048,
         bottleneck_dim=256,
         mlp_bias=True,
+        loss: dict = dict(type='CrossEntropyLoss', loss_weight=1.0),
     ):
         super().__init__()
         nlayers = max(nlayers, 1)
@@ -28,6 +29,9 @@ class DINOHead(ClsHead): # Changed from nn.Module to ClsHead, which inherits fro
         self.apply(self._init_weights)
         self.last_layer = weight_norm(nn.Linear(bottleneck_dim, out_dim, bias=False))
         self.last_layer.weight_g.data.fill_(1)
+        if not isinstance(loss, nn.Module):
+            loss = MODELS.build(loss)
+        self.loss_module = loss
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):

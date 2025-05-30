@@ -1,0 +1,27 @@
+How does:
+
+python tools/train.py configs/pretrain01/test.py
+
+know to find SEBNet at sebpretrain/models/backbones/sebnet.py and register it in mmpretrain::model registry or mmengine::model registry? Your script is failing at Runner.from_cfg(cfg) indicating that cfg was loaded correctly. The problem now is getting the Runner object to find and register your custom backbone and head at sebpretrain/models/backbones/sebnet.py and sebpretrain/models/heads/dino_head.py
+
+Runner.from_cfg(cfg)
+ - Calls self.build_model()
+    - Calls MODELS.build()
+
+An example of MODELS.build():
+
+            >>> from mmengine import Registry
+            >>> MODELS = Registry('models')
+            >>> @MODELS.register_module()
+            >>> class ResNet:
+            >>>     def __init__(self, depth, stages=4):
+            >>>         self.depth = depth
+            >>>         self.stages = stages
+            >>> cfg = dict(type='ResNet', depth=50)
+            >>> model = MODELS.build(cfg)
+
+Recreating this in a jupyter notebook is the first step. Remember that the current problem is figuring out how your training script will find sebnet.py and register the model in the corresponding registry.
+
+Recreated this in a jupyter notebook, z_test-registries.ipynb. SEBNet from sebnet.py was initialized and built in MODELS.build(cfg.model.backbone) after fixing an error in the nn.Sequential() call of the constructor. Also got the DINO head to initialize by adding a previously unrecognized keyword 'loss'. You may still need to implement loss as a method in DINOHead(). The Runner object built after these fixes, so you only need to figure out how the Runner object in the training script will find your custom backbone and head.
+NOTE: Keep in mind you played with some of the imports in sebnet.py and sebpretrain/models/utils/basic_block.py, so you may need to fix those. You should also remove the print statements you put in python3.8/site-packages/mmengine/registry/build_functions.py. See line 100.
+

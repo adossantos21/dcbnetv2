@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from mmpretrain.registry import MODELS
+#from mmpretrain.registry import MODELS
+from mmengine.registry import MODELS
 
 BACKBONES = MODELS
 NECKS = MODELS

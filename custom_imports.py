@@ -1,3 +1,14 @@
+custom_imports = dict(
+    imports=['test'],
+    allow_failed_imports=False,
+)
+
+_base_ = [
+    '../_base_/datasets/imagenet_bs32.py',
+    '../_base_/schedules/imagenet_bs256.py',
+    '../_base_/default_runtime.py'
+]
+
 model = dict(
     type='ImageClassifier',     # The type of the main model (here is for image classification task).
     backbone=dict(
